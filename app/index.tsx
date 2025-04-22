@@ -1,23 +1,47 @@
+import { useState } from "react";
 import {
+  // Keyboard,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { Task } from "@/components/Task";
-import { TextInput } from "react-native-gesture-handler";
 
 export default function Home() {
+  const [task, setTask] = useState<string | null>(null);
+  const [taskItems, setTaskItems] = useState<string[]>([]);
+
+  const handleAddTask = () => {
+    // Keyboard.dismiss();
+    setTaskItems((prevItems) => {
+      if (!task) return prevItems;
+
+      return [...prevItems, task];
+    });
+    setTask(null);
+  };
+
+  const completeTask = (index: number) => {
+    const itemsCopied = [...taskItems];
+    itemsCopied.splice(index, 1);
+    setTaskItems(itemsCopied);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.taskWrapper}>
         <Text style={styles.sectionTitle}>Today's tasks</Text>
 
         <View style={styles.items}>
-          <Task text="Task 1" />
-          <Task text="Task 2" />
+          {taskItems.map((text, index) => (
+            <TouchableOpacity key={text} onPress={() => completeTask(index)}>
+              <Task text={text} />
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
 
@@ -25,9 +49,14 @@ export default function Home() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.writeTaskWrapper}
       >
-        <TextInput style={styles.input} placeholder="Write a Task" />
+        <TextInput
+          style={styles.input}
+          placeholder="Write a Task"
+          value={task ?? ""}
+          onChangeText={(text) => setTask(text)}
+        />
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => handleAddTask()}>
           <View style={styles.addWrapper}>
             <Text style={styles.addText}>+</Text>
           </View>
@@ -58,7 +87,7 @@ const styles = StyleSheet.create({
     bottom: 60,
     width: "100%",
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
     alignItems: "center",
   },
   input: {
@@ -76,6 +105,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     borderRadius: 60,
     justifyContent: "center",
+    alignItems: "center",
+    borderColor: "#C0C0C0",
+    borderWidth: 1,
   },
   addText: {},
 });
